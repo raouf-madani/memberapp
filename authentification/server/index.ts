@@ -93,4 +93,16 @@ router.post('/login', validationLogin, async (req: any, res: any)=>{
 
  });
 
+ //display our members list
+ router.get('/membersList',(req:any,res:any)=>{
+    Member.find({},(err:any,members:any)=>{
+         if(err){
+             res.send(err);
+             return;
+         }
+         res.send(members);
+         
+    });
+ });
+
  app.use('/api/users',router); 

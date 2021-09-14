@@ -128,4 +128,13 @@ router.patch('/updateMember/:id', function (req, res) { return __awaiter(_this, 
         }
     });
 }); });
+router.get('/membersList', function (req, res) {
+    Member.find({}, function (err, members) {
+        if (err) {
+            res.send(err);
+            return;
+        }
+        res.send(members);
+    });
+});
 app.use('/api/users', router);
