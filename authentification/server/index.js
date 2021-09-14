@@ -53,7 +53,7 @@ router.post('/register', validation,async (req,res)=>{
 
 
 
-
+//post request to login a member if his account exists
 router.post('/login', validationLogin, async (req,res)=>{
     
     //catch errors from memberInfo validation
@@ -62,13 +62,34 @@ router.post('/login', validationLogin, async (req,res)=>{
         return res.status(400).json({ error: error.array() });
       }
 
-    // we need to check if the email existe in the database
+    // we need to check if the email exists in the database
     const member = await Member.findOne({email:req.body.email});
     if(!member) return res.status(404).send("You're not a member, don't miss with us");
     
     //create plus assign a token
     const token = jwt.sign({_id:member._id,email:member.email},process.env.SECRET);
     res.header('auth-token',token).send({message:`Hi ${member.name}, welcome back!`,token});
+ });
+
+ //update a member (post request)
+ router.patch('/updateMember/:id',async(req,res)=>{
+
+  //catch errors from memberInfo validation
+  /*const error= validationResult(req);*/
+ /* if (!error.isEmpty()) {*/
+     // return res.status(400).json({ error: error.array() });
+  // }
+  
+  try{
+   
+   const updatedMember= await Member.findByIdAndUpdate(req.params.id,req.body,{new:true});
+    res.send(updatedMember);
+
+  }catch(err){
+      console.log(err);
+  }
+
+
  });
 
  app.use('/api/users',router); 
