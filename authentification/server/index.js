@@ -42,6 +42,7 @@ app.use(express.json());
 var mongoose = require('mongoose');
 var _a = require('express-validator'), check = _a.check, validationResult = _a.validationResult;
 var jwt = require("jsonwebtoken");
+var bcrypt = require("bcryptjs");
 require('dotenv').config(); //to hide passwords
 mongoose.connect("mongodb://raoufmadani-memberapp:" + process.env.PASSWORD + "@cluster0-shard-00-00.4kbqq.mongodb.net:27017,cluster0-shard-00-01.4kbqq.mongodb.net:27017,cluster0-shard-00-02.4kbqq.mongodb.net:27017/myFirstDatabase?ssl=true&replicaSet=atlas-iq58od-shard-0&authSource=admin&retryWrites=true&w=majority")
     .then(function () {
@@ -50,12 +51,12 @@ mongoose.connect("mongodb://raoufmadani-memberapp:" + process.env.PASSWORD + "@c
 var Member = require('./models/Member');
 // Verify memberInfo validity during registration
 var validation = [check('name').isLength({ min: 3 }).withMessage('Please provide your name!'),
-    check('email').isEmail().withMessage('Please provide a valid email!')];
+    check('email').isEmail().withMessage('Please provide a valid email!'), check('password').isLength({ min: 6 }).withMessage('Your password should contain minimum 6 letters!')];
 // Verify memberInfo validity during login
-var validationLogin = [check('email').isEmail().withMessage('Please provide a valid email!')];
+var validationLogin = [check('email').isEmail().withMessage('Please provide a valid email!'), check('password').isLength({ min: 6 }).withMessage('Your password should contain minimum 6 letters!')];
 // post request to register a new member, asynchronous function
 router.post('/register', validation, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-    var error, newMember, memberInfo, err_1;
+    var error, memberExist, rounds, hashpass, newMember, memberInfo, err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -63,33 +64,45 @@ router.post('/register', validation, function (req, res) { return __awaiter(_thi
                 if (!error.isEmpty()) {
                     return [2 /*return*/, res.status(400).json({ error: error.array() })];
                 }
+                return [4 /*yield*/, Member.findOne({ email: req.body.email })];
+            case 1:
+                memberExist = _a.sent();
+                if (memberExist)
+                    return [2 /*return*/, res.status(400).send('Email already exists')];
+                return [4 /*yield*/, bcrypt.genSalt()];
+            case 2:
+                rounds = _a.sent();
+                return [4 /*yield*/, bcrypt.hash(req.body.password, rounds)];
+            case 3:
+                hashpass = _a.sent();
                 newMember = new Member({
                     name: req.body.name,
                     email: req.body.email,
+                    password: hashpass,
                     address: req.body.address,
                     birthdate: req.body.birthdate,
                     entranceDate: req.body.entranceDate
                 });
-                _a.label = 1;
-            case 1:
-                _a.trys.push([1, 3, , 4]);
+                _a.label = 4;
+            case 4:
+                _a.trys.push([4, 6, , 7]);
                 return [4 /*yield*/, newMember.save()];
-            case 2:
+            case 5:
                 memberInfo = _a.sent();
                 res.send(memberInfo);
-                return [3 /*break*/, 4];
-            case 3:
+                return [3 /*break*/, 7];
+            case 6:
                 err_1 = _a.sent();
                 //catch the error
                 console.log(err_1);
-                return [3 /*break*/, 4];
-            case 4: return [2 /*return*/];
+                return [3 /*break*/, 7];
+            case 7: return [2 /*return*/];
         }
     });
 }); });
 //post request to login a member if his account exists
 router.post('/login', validationLogin, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-    var error, member, token;
+    var error, member, correctPass, token;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -102,6 +115,11 @@ router.post('/login', validationLogin, function (req, res) { return __awaiter(_t
                 member = _a.sent();
                 if (!member)
                     return [2 /*return*/, res.status(404).send("You're not a member, don't miss with us")];
+                return [4 /*yield*/, bcrypt.compare(req.body.password, member.password)];
+            case 2:
+                correctPass = _a.sent();
+                if (!correctPass)
+                    return [2 /*return*/, res.status(404).send("Your email or password is worng!")];
                 token = jwt.sign({ _id: member._id, email: member.email }, process.env.SECRET);
                 res.header('auth-token', token).send({ message: "Hi " + member.name + ", welcome back!", token: token });
                 return [2 /*return*/];
@@ -128,6 +146,7 @@ router.patch('/updateMember/:id', function (req, res) { return __awaiter(_this, 
         }
     });
 }); });
+//display our members list
 router.get('/membersList', function (req, res) {
     Member.find({}, function (err, members) {
         if (err) {
