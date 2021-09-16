@@ -3,13 +3,16 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Navigator from './navigation/Navigator';
 import {enableScreens} from 'react-native-screens';
-
-
+import {Provider} from 'react-redux';
+import store from './redux/store';
 enableScreens();
 
 export default function App() {
   return (
-    <Navigator />
+    <Provider store={store}> 
+        <Navigator />
+    </Provider>
+ 
   );
 }
 
