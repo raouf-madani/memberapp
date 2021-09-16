@@ -8,11 +8,13 @@ KeyboardAvoidingView,
 TextInput,
 TouchableOpacity,
 Image,
-Platform} from 'react-native';
+Platform,
+Alert} from 'react-native';
 import { Formik } from "formik";
 import * as yup from 'yup';
 import * as authAction from '../redux/actions/authActions';
 import {useDispatch} from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const formSchema = yup.object({
     email: yup.string().email().required(),
@@ -37,8 +39,20 @@ const LoginScreen = navData => {
     onSubmit={(values) => {
       console.log(values);
       dispatch(authAction.loginMember(values))
-      .then(()=>{
-        navData.navigation.navigate("Dashboard");
+      .then(async result=>{
+          
+          if(result.success){
+              try{
+                await AsyncStorage.setItem('token',result.token);
+                navData.navigation.navigate("Dashboard");
+              }catch(err){
+                  console.log(err);
+              }
+           
+          }else{
+              Alert.alert(`Sorry`,'Your email or password is wrong');
+          }
+        
       })
       .catch(err => console.log(err));
     }}

@@ -25,11 +25,21 @@ export const registerMember = authData => {
         });
    
         const resultData = await result.json();
-        console.log(resultData);
-       dispatch({
-           type: REGISTER_MEMBER_SUCCESS,
-           payload:1
-       });
+        
+        if(resultData.success){
+            dispatch({
+                type: REGISTER_MEMBER_SUCCESS,
+                playload:resultData
+            });
+        }else{
+            dispatch({
+                type: REGISTER_MEMBER_FAIL,
+               
+            });
+        }
+     
+
+       return resultData;
     };
 };
 
@@ -53,9 +63,20 @@ export const loginMember = authData => {
    
         const resultData = await result.json();
         console.log(resultData);
-       dispatch({
-           type: LOGIN_MEMBER_SUCCESS,
-           playload:1
-       });
+
+        //handling errors
+        if(resultData.success){
+            dispatch({
+                type: LOGIN_MEMBER_SUCCESS,
+                playload:resultData
+            });
+        }else{
+            dispatch({
+                type: LOGIN_MEMBER_FAIL,
+           
+            });
+        }
+        return resultData;
+       
     };
 };

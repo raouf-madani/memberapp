@@ -1,4 +1,4 @@
-import { REGISTER_MEMBER_SUCCESS, LOGIN_MEMBER_SUCCESS } from "../actions/authActions";
+import { REGISTER_MEMBER_SUCCESS, LOGIN_MEMBER_SUCCESS, LOGIN_MEMBER_FAIL,REGISTER_MEMBER_FAIL } from "../actions/authActions";
 
 const initialState = {
     member: {},
@@ -21,6 +21,18 @@ export default function (state = initialState, action){
                 ...state,
                 member:action.payload
             };
+
+        case LOGIN_MEMBER_FAIL:
+            return {
+               ...state,
+               errors:action.payload
+
+            }
+        case REGISTER_MEMBER_FAIL:
+        return {
+            ...state,
+            errors:action.payload
+        }
     }
 
     return state;

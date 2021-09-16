@@ -7,11 +7,13 @@ import { StyleSheet,
     TextInput,
     TouchableOpacity,
     Image,
-    Platform,} from 'react-native';
+    Platform,
+    Alert,} from 'react-native';
 import { Formik } from "formik";
 import * as yup from 'yup';
 import * as authAction from '../redux/actions/authActions';
 import {useDispatch} from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 //define validation schema
 const formSchema = yup.object({
@@ -46,8 +48,18 @@ const MemberRegisterScreen = navData => {
         onSubmit={(values) => {
           console.log(values);
           dispatch(authAction.registerMember(values))
-          .then(()=>{
-            navData.navigation.navigate("Dashboard");
+          .then(async result=>{
+              if(result.success){
+                try{
+                    await AsyncStorage.setItem('token',result.token);
+                    navData.navigation.navigate("Dashboard");
+                  }catch(err){
+                      console.log(err);
+                  }
+              }else{
+                  Alert.alert(`Sorry`,'Try again');
+              }
+         
           })
           .catch(err => console.log(err));
          
