@@ -6,6 +6,7 @@ const mongoose=require('mongoose');
 const {check,validationResult}= require('express-validator');
 const jwt= require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const verifyToken= require('./middleware/protectRoute');
 
 require('dotenv').config(); //to hide passwords
 
@@ -35,12 +36,13 @@ router.post('/register', validation,async (req:any, res:any)=>{
 
     // Verify if the member email already exists in the database
       const memberExist= await Member.findOne({email:req.body.email});
-      if(memberExist) return res.status(400).send('Email already exists');
+      if(memberExist) return res.status(400).send({success:false,message:'Email already exists!'});
 
     //hasing member password using bcrypt
     const rounds= await bcrypt.genSalt();
     const hashpass= await bcrypt.hash(req.body.password,rounds);
-
+    
+    
     //creating a new instance
     const newMember = new Member({
        name: req.body.name,
@@ -53,10 +55,15 @@ router.post('/register', validation,async (req:any, res:any)=>{
 
     try{
         const memberInfo = await newMember.save();
-        res.send(memberInfo);
+
+        //generate token once the member has registered to his account
+        const token = jwt.sign({_id:newMember._id,email:newMember.email},process.env.SECRET);
+
+        res.send({success:true,data:memberInfo,token});
+
     } catch(err){
         //catch the error
-        console.log(err);
+        console.log({success:false,err});
     }
  });
 
@@ -74,15 +81,15 @@ router.post('/login', validationLogin, async (req: any, res: any)=>{
 
     // we need to check if the email exists in the database
     const member = await Member.findOne({email:req.body.email});
-    if(!member) return res.status(404).send("You're not a member, don't miss with us");
+    if(!member) return res.status(404).send({success:false,message:"You're not a member, don't miss with us"});
 
     // check if the password is correct
     const correctPass= await bcrypt.compare(req.body.password,member.password);
-    if(!correctPass) return res.status(404).send("Your email or password is worng!");
+    if(!correctPass) return res.status(404).send({success:false,messsage:"Your email or password is worng!"});
     
     //create plus assign a token
     const token = jwt.sign({_id:member._id,email:member.email},process.env.SECRET);
-    res.header('auth-token',token).send({message:`Hi ${member.name}, welcome back!`,token});
+    res.header('auth-token',token).send({success:true,message:`Hi ${member.name}, welcome back!`,token});
  });
  
 
@@ -117,6 +124,11 @@ router.post('/login', validationLogin, async (req: any, res: any)=>{
          res.send(members);
          
     });
+ });
+
+ //protecting the profile route for members
+ app.get('/api/member/profile',verifyToken,(req:any,res:any)=>{
+     res.send({success:true,data:req.member});
  });
 
  app.use('/api/users',router); 

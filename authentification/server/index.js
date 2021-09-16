@@ -43,6 +43,7 @@ var mongoose = require('mongoose');
 var _a = require('express-validator'), check = _a.check, validationResult = _a.validationResult;
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
+var verifyToken = require('./middleware/protectRoute');
 require('dotenv').config(); //to hide passwords
 mongoose.connect("mongodb://raoufmadani-memberapp:" + process.env.PASSWORD + "@cluster0-shard-00-00.4kbqq.mongodb.net:27017,cluster0-shard-00-01.4kbqq.mongodb.net:27017,cluster0-shard-00-02.4kbqq.mongodb.net:27017/myFirstDatabase?ssl=true&replicaSet=atlas-iq58od-shard-0&authSource=admin&retryWrites=true&w=majority")
     .then(function () {
@@ -56,7 +57,7 @@ var validation = [check('name').isLength({ min: 3 }).withMessage('Please provide
 var validationLogin = [check('email').isEmail().withMessage('Please provide a valid email!'), check('password').isLength({ min: 6 }).withMessage('Your password should contain minimum 6 letters!')];
 // post request to register a new member, asynchronous function
 router.post('/register', validation, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-    var error, memberExist, rounds, hashpass, newMember, memberInfo, err_1;
+    var error, memberExist, rounds, hashpass, newMember, memberInfo, token, err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -68,7 +69,7 @@ router.post('/register', validation, function (req, res) { return __awaiter(_thi
             case 1:
                 memberExist = _a.sent();
                 if (memberExist)
-                    return [2 /*return*/, res.status(400).send('Email already exists')];
+                    return [2 /*return*/, res.status(400).send({ success: false, message: 'Email already exists!' })];
                 return [4 /*yield*/, bcrypt.genSalt()];
             case 2:
                 rounds = _a.sent();
@@ -89,12 +90,13 @@ router.post('/register', validation, function (req, res) { return __awaiter(_thi
                 return [4 /*yield*/, newMember.save()];
             case 5:
                 memberInfo = _a.sent();
-                res.send(memberInfo);
+                token = jwt.sign({ _id: newMember._id, email: newMember.email, name: newMember.name }, process.env.SECRET);
+                res.send({ success: true, data: memberInfo, token: token });
                 return [3 /*break*/, 7];
             case 6:
                 err_1 = _a.sent();
                 //catch the error
-                console.log(err_1);
+                console.log({ success: false, err: err_1 });
                 return [3 /*break*/, 7];
             case 7: return [2 /*return*/];
         }
@@ -114,14 +116,14 @@ router.post('/login', validationLogin, function (req, res) { return __awaiter(_t
             case 1:
                 member = _a.sent();
                 if (!member)
-                    return [2 /*return*/, res.status(404).send("You're not a member, don't miss with us")];
+                    return [2 /*return*/, res.status(404).send({ success: false, message: "You're not a member, don't miss with us" })];
                 return [4 /*yield*/, bcrypt.compare(req.body.password, member.password)];
             case 2:
                 correctPass = _a.sent();
                 if (!correctPass)
-                    return [2 /*return*/, res.status(404).send("Your email or password is worng!")];
-                token = jwt.sign({ _id: member._id, email: member.email }, process.env.SECRET);
-                res.header('auth-token', token).send({ message: "Hi " + member.name + ", welcome back!", token: token });
+                    return [2 /*return*/, res.status(404).send({ success: false, messsage: "Your email or password is worng!" })];
+                token = jwt.sign({ _id: member._id, email: member.email, name: member.name }, process.env.SECRET);
+                res.header('auth-token', token).send({ success: true, message: "Hi " + member.name + ", welcome back!", token: token });
                 return [2 /*return*/];
         }
     });
@@ -155,5 +157,9 @@ router.get('/membersList', function (req, res) {
         }
         res.send(members);
     });
+});
+//protecting the profile route for members
+app.get('/api/member/profile', verifyToken, function (req, res) {
+    res.send({ success: true, data: req.member });
 });
 app.use('/api/users', router);
