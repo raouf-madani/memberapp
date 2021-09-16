@@ -12,6 +12,11 @@ Platform} from 'react-native';
 import { Formik } from "formik";
 import * as yup from 'yup';
 
+const formSchema = yup.object({
+    email: yup.string().email().required(),
+    password: yup.string().required().min(6),
+  });
+  
 const LoginScreen = navData => {
 
    return(
@@ -23,7 +28,7 @@ const LoginScreen = navData => {
       email: "",
       password: "",
     }}
-  
+    validationSchema={formSchema}
     onSubmit={(values) => {
       console.log(values);
       navData.navigation.navigate('Dashboard')

@@ -11,6 +11,13 @@ import { StyleSheet,
 import { Formik } from "formik";
 import * as yup from 'yup';
 
+//define validation schema
+const formSchema = yup.object({
+    name: yup.string().required().min(3),
+    email: yup.string().email().required(),
+    password: yup.string().required().min(6),
+  });
+
 const MemberRegisterScreen = navData => {
 
 
@@ -21,11 +28,11 @@ const MemberRegisterScreen = navData => {
     >
       <Formik
         initialValues={{
-          fullName: "",
+          name: "",
           email: "",
           password: "",
         }}
-      
+        validationSchema={formSchema}
         onSubmit={(values) => {
           console.log(values);
           navData.navigation.navigate("Dashboard");
@@ -42,14 +49,14 @@ const MemberRegisterScreen = navData => {
             <View>
               <TextInput
                 style={styles.input}
-                placeholder="Full Name"
+                placeholder="Name"
                 placeholderTextColor="#fff"
-                onChangeText={props.handleChange("fullName")}
-                value={props.values.fullName}
-                onBlur={props.handleBlur("fullName")}
+                onChangeText={props.handleChange("name")}
+                value={props.values.name}
+                onBlur={props.handleBlur("name")}
               />
               <Text style={styles.error}>
-                {props.touched.fullName && props.errors.fullName}
+                {props.touched.name && props.errors.name}
               </Text>
               <TextInput
                 style={styles.input}
