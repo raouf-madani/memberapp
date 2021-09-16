@@ -8,7 +8,7 @@ export const registerMember = authData => {
     
     return async dispatch => {
         //logic to make a post to create the member
-        console.log('hry');
+      
         const result = await fetch('http://192.168.1.38:3000/api/users/register', {
             method:'POST',
             headers: {
@@ -23,8 +23,8 @@ export const registerMember = authData => {
                 entranceDate
             })
         });
-        console.log('ssss')
-        const resultData = result.json();
+   
+        const resultData = await result.json();
         console.log(resultData);
        dispatch({
            type: REGISTER_MEMBER_SUCCESS,
@@ -38,8 +38,23 @@ export const loginMember = authData => {
     
     return async dispatch => {
         //logic to make a post to LOGIN the member
+        const result = await fetch('http://192.168.1.38:3000/api/users/login', {
+            method:'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body:JSON.stringify({
+               
+                email,
+                password,
+               
+            })
+        });
+   
+        const resultData = await result.json();
+        console.log(resultData);
        dispatch({
-           type: REGISTER_MEMBER_SUCCESS,
+           type: LOGIN_MEMBER_SUCCESS,
            playload:1
        });
     };

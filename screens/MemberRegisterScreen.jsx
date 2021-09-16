@@ -25,6 +25,7 @@ const formSchema = yup.object({
 
 const MemberRegisterScreen = navData => {
 
+   //initialize our dispatch function
    const dispatch = useDispatch();
 
    return(
