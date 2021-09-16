@@ -6,8 +6,11 @@ const initialState = {
 }
 
 export default function (state = initialState, action){
+
     switch(action.type){
+        
         case REGISTER_MEMBER_SUCCESS:
+            console.log('enter');
             return {
                 ...state,
                 member:action.payload

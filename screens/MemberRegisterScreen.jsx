@@ -10,16 +10,22 @@ import { StyleSheet,
     Platform,} from 'react-native';
 import { Formik } from "formik";
 import * as yup from 'yup';
+import * as authAction from '../redux/actions/authActions';
+import {useDispatch} from 'react-redux';
 
 //define validation schema
 const formSchema = yup.object({
     name: yup.string().required().min(3),
     email: yup.string().email().required(),
     password: yup.string().required().min(6),
+    address:yup.string(),
+    birthdate:yup.string(),
+    entranceDate:yup.string()
   });
 
 const MemberRegisterScreen = navData => {
 
+   const dispatch = useDispatch();
 
    return(
        <KeyboardAvoidingView
@@ -31,21 +37,24 @@ const MemberRegisterScreen = navData => {
           name: "",
           email: "",
           password: "",
+          address:"",
+          birthdate:"",
+          entranceDate:""
         }}
         validationSchema={formSchema}
         onSubmit={(values) => {
           console.log(values);
-          navData.navigation.navigate("Dashboard");
+          dispatch(authAction.registerMember(values))
+          .then(()=>{
+            navData.navigation.navigate("Dashboard");
+          })
+          .catch(err => console.log(err));
+         
         }}
       >
         {(props) => (
           <View style={styles.container}>
-            <View style={styles.logo}>
-              <Image
-                source={require("../assets/logo.png")}
-                style={styles.image}
-              />
-            </View>
+            
             <View>
               <TextInput
                 style={styles.input}
@@ -55,9 +64,7 @@ const MemberRegisterScreen = navData => {
                 value={props.values.name}
                 onBlur={props.handleBlur("name")}
               />
-              <Text style={styles.error}>
-                {props.touched.name && props.errors.name}
-              </Text>
+           
               <TextInput
                 style={styles.input}
                 placeholder="Email"
@@ -67,9 +74,7 @@ const MemberRegisterScreen = navData => {
                 value={props.values.email}
                 onBlur={props.handleBlur("email")}
               />
-              <Text style={styles.error}>
-                {props.touched.email && props.errors.email}
-              </Text>
+            
               <TextInput
                 style={styles.input}
                 placeholder="Password"
@@ -79,9 +84,34 @@ const MemberRegisterScreen = navData => {
                 value={props.values.password}
                 onBlur={props.handleBlur("password")}
               />
-              <Text style={styles.error}>
-                {props.touched.password && props.errors.password}
-              </Text>
+           
+              <TextInput
+                style={styles.input}
+                placeholder="Address"
+                placeholderTextColor="#fff"
+                onChangeText={props.handleChange("address")}
+                value={props.values.address}
+                onBlur={props.handleBlur("address")}
+              />
+            
+              <TextInput
+                style={styles.input}
+                placeholder="Birthdate"
+                placeholderTextColor="#fff"
+                onChangeText={props.handleChange("birthdate")}
+                value={props.values.birthdate}
+                onBlur={props.handleBlur("birthdate")}
+              />
+         
+              <TextInput
+                style={styles.input}
+                placeholder="Entrance Date"
+                placeholderTextColor="#fff"
+                onChangeText={props.handleChange("entranceDate")}
+                value={props.values.entranceDate}
+                onBlur={props.handleBlur("entranceDate")}
+              />
+           
               <TouchableOpacity
                 style={styles.button}
                 onPress={props.handleSubmit}
@@ -105,16 +135,32 @@ const MemberRegisterScreen = navData => {
 
 };
 
+MemberRegisterScreen.navigationOptions= ()=>{
+    return {
+      headerTransparent : true ,
+      headerStyle:{
+          backgroundColor: 'white'
+      },
+      headerBackTitle : " ",
+      headerTitle: () => (
+        <Image 
+        style={{
+          resizeMode:'contain',
+          alignSelf: 'center'}}
+        
+        />
+      ),
+      headerLeft:()=>null,
+    
+    };
+  }
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "#ffffff",
-      },
-      logo: {
-        alignItems: "center",
-        marginBottom: 40,
       },
       image: {
         width: 100,
@@ -124,15 +170,15 @@ const styles = StyleSheet.create({
         width: 300,
         backgroundColor: "#B6BFC4",
         borderRadius: 25,
-        padding: 16,
-        fontSize: 16,
+        padding: 12,
+        fontSize: 14,
         marginVertical: 10,
       },
       button: {
         width: 300,
         backgroundColor: "#738289",
         borderRadius: 25,
-        marginVertical: 10,
+        marginVertical: 5,
         paddingVertical: 13,
       },
       buttonText: {

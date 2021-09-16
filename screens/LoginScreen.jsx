@@ -83,6 +83,26 @@ const LoginScreen = navData => {
 
 };
 
+LoginScreen.navigationOptions= ()=>{
+    return {
+      headerTransparent : true ,
+      headerStyle:{
+          backgroundColor: 'white'
+      },
+      headerBackTitle : " ",
+      headerTitle: () => (
+        <Image 
+        style={{
+          resizeMode:'contain',
+          alignSelf: 'center'}}
+        
+        />
+      ),
+      headerLeft:()=>null,
+    
+    };
+  }
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
