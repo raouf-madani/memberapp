@@ -10,7 +10,7 @@ const Dashboard = props => {
     const [error, setError] = useState();
     const [isLoading,setIsLoading]= useState(false);//ActivityIndicator handling
     const dispatch= useDispatch();
-
+   
     const getMembers=useCallback(async()=>{
   
   
@@ -37,6 +37,7 @@ const Dashboard = props => {
         },[dispatch,getMembers,setError]);
    
     const [email, setEmail]= useState('');
+    const [ID, setID]= useState('');
     
     const loadMemberProfile = async ()=> {
      const token =await AsyncStorage.getItem('token');
@@ -47,6 +48,7 @@ const Dashboard = props => {
 
      const decodeToken = jwtDecode(token);
      setEmail(decodeToken.email);
+     setID(decodeToken._id);
      console.log(decodeToken);
     };
 
@@ -62,6 +64,8 @@ const Dashboard = props => {
     useEffect(()=>{
        loadMemberProfile();
     });
+
+
 
    return(
        <View style={styles.container}>
@@ -85,7 +89,8 @@ const Dashboard = props => {
                   />
                    <Cart
                   title="Update your information"
-                  onPress={()=>props.navigation.navigate("UpdateMember")}
+                  onPress={()=>props.navigation.navigate("UpdateMember",{memberID:ID? ID:''})}
+               
                   />
              
        </View>

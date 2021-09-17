@@ -11,6 +11,7 @@ const MembersList = () => {
    return(
        <ScrollView>
              {member.map(member=>(<MemberListCart
+               key={member._id}
                name={member.name}
                email={member.email}
                address={member.address}
