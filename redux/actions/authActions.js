@@ -29,7 +29,7 @@ export const registerMember = authData => {
         if(resultData.success){
             dispatch({
                 type: REGISTER_MEMBER_SUCCESS,
-                playload:resultData
+                payload:resultData
             });
         }else{
             dispatch({
@@ -62,13 +62,13 @@ export const loginMember = authData => {
         });
    
         const resultData = await result.json();
-        console.log(resultData);
+        //console.log(resultData);
 
         //handling errors
         if(resultData.success){
             dispatch({
                 type: LOGIN_MEMBER_SUCCESS,
-                playload:resultData
+                payload:resultData
             });
         }else{
             dispatch({

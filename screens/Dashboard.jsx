@@ -1,11 +1,41 @@
-import React,{useEffect,useState} from 'react';
-import {StyleSheet, View, Text,Button} from 'react-native';
+import React,{useEffect,useState,useCallback} from 'react';
+import {StyleSheet, View, Text,TouchableOpacity} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import jwtDecode from 'jwt-decode';
+import Cart from '../components/cart';
+import * as memberActions from '../redux/actions/memberActions';
+import { useDispatch,useSelector } from 'react-redux';
 
 const Dashboard = props => {
+    const [error, setError] = useState();
+    const [isLoading,setIsLoading]= useState(false);//ActivityIndicator handling
+    const dispatch= useDispatch();
 
-    const [name, setName]=useState('');
+    const getMembers=useCallback(async()=>{
+  
+  
+
+        try{
+          setError(false);
+          setIsLoading(true);
+      
+          await dispatch(memberActions.setMembers());
+        
+          setIsLoading(false);
+    
+          }catch(err){
+            console.log('error fatal')
+            setError(true);
+            throw err; 
+          }
+      },[dispatch,setError]);
+
+      useEffect(()=>{
+       
+        getMembers();
+ 
+        },[dispatch,getMembers,setError]);
+   
     const [email, setEmail]= useState('');
     
     const loadMemberProfile = async ()=> {
@@ -16,7 +46,6 @@ const Dashboard = props => {
      console.log(token);
 
      const decodeToken = jwtDecode(token);
-     setName(decodeToken.name);
      setEmail(decodeToken.email);
      console.log(decodeToken);
     };
@@ -36,18 +65,29 @@ const Dashboard = props => {
 
    return(
        <View style={styles.container}>
-           <View><Text style={styles.text}>Hi {name?name:''} </Text></View>
-           <View><Text style={styles.text}>Your email is {email?email:''} </Text></View>
-             <View>
-                 <Button
-                 title="Logout"
-                 onPress={
-                     ()=>{
-                         logout(props)
-                     }
-                 }
-                 />
-             </View>
+
+           <View style={styles.textCont}><Text style={styles.text}>Hi {email?email:''} </Text></View>
+            
+                 <TouchableOpacity
+                  style={styles.button}
+                   onPress={
+                    ()=>{
+                        logout(props)
+                    }
+                }
+                >
+                  <Text style={styles.registerButton}>Logout</Text>
+                </TouchableOpacity>
+                <View><Text style={styles.text2}>Menu : </Text></View>
+                <Cart
+                  title="Members List"
+                  onPress={()=>props.navigation.navigate("MembersList")}
+                  />
+                   <Cart
+                  title="Update your information"
+                  onPress={()=>props.navigation.navigate("UpdateMember")}
+                  />
+             
        </View>
    )
 
@@ -64,9 +104,30 @@ const styles = StyleSheet.create({
      flex:1,
      padding:40
  },
+ textCont:{
+   alignItems:'center',
+   paddingBottom:10
+ },
  text:{
      fontSize:16
- }
+ },
+ text:{
+    fontSize:16,
+    color:'#0066ff'
+},
+ button: {
+    width: 300,
+    backgroundColor: "#738289",
+    borderRadius: 25,
+    marginVertical: 5,
+    paddingVertical: 13,
+  },
+  registerButton: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
+    alignSelf:'center'
+  },
 });
 
 export default Dashboard;

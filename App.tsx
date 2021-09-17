@@ -4,10 +4,22 @@ import { StyleSheet, Text, View } from 'react-native';
 import Navigator from './navigation/Navigator';
 import {enableScreens} from 'react-native-screens';
 import {Provider} from 'react-redux';
-import store from './redux/store';
+import ReduxThunk from "redux-thunk";
+import {createStore,combineReducers,applyMiddleware} from 'redux';
+import membersReducer from './redux/reducers/memberReducer';
 enableScreens();
 
+//Create the store and the combine reducers
+const rootReducer = combineReducers({
+  members:membersReducer,
+  
+  });
+  
+  const store = createStore(rootReducer, applyMiddleware(ReduxThunk));
+
 export default function App() {
+
+
   return (
     <Provider store={store}> 
         <Navigator />
