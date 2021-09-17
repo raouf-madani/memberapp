@@ -31,7 +31,8 @@ export const updateMember = (id,name,email,address,birthdate,entranceDate) => {
     return async dispatch => {
       
         try{
-             console.log('I entereeed here')
+             
+       
             const response = await fetch(`http://192.168.1.38:3000/api/users/updateMember/${id}`,{
  
                method:'PATCH',
@@ -40,12 +41,13 @@ export const updateMember = (id,name,email,address,birthdate,entranceDate) => {
              },
              body : JSON.stringify({name,email,address,birthdate,entranceDate})
             });
+            console.log('response');
             if(!response.ok){
                 console.log('response isnt okkkkk');
                 throw new Error('Oups! Une erreur est survenue in ur fetch.');
             }
-            console.log('heeey this is response of update');
-            console.log(response);
+   
+           
             dispatch({type:UPDATE_MEMBER,id,memberData:{name,email,address,birthdate,entranceDate}});
             
           }catch(err){

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet,
     View,
     Text,
@@ -36,15 +36,14 @@ const UpdateMemberScreen = navData => {
    const members= useSelector(state=>state.members.members);
    const member = members.find(object=>object._id === memberID);
 
-   const updateHandler = async ()=>{
+   /*const updateHandler = async ()=>{
       try{
         await dispatch(memberActions.updateMember(member._id,member.name,member.address,member.email,member.birthdate,member.entraceDate))
       }catch(err){
          console.log(err);
       }
-   };
+   };*/
  
-
    return(
        <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -58,26 +57,16 @@ const UpdateMemberScreen = navData => {
           birthdate:member?member.birthdate:"",
           entranceDate:member?member.entranceDate:""
         }}
-        validationSchema={formSchema}
-        onSubmit={(values) => {
-          /*  console.log(values);
+       
+        onSubmit={ async (values) => {
+         /*console.log(values);*/
          console.log('iM UPDATING DUDE');
-          dispatch(memberActions.updateMember(member._id,member.name))
-          .then(async result=>{
-              if(result.success){
-                try{
-                    console.log('sucesssssss update');
-                  }catch(err){
-                    console.log('errrrrooooor update');
-                      console.log(err);
-                  }
-              }else{
-                  Alert.alert(`Sorry`,'Try again');
-              }
-         
-          })
-          .catch(err => console.log(err));*/
-         
+         try{
+           await dispatch(memberActions.updateMember(memberID,values.name,values.email,values.address,values.birthdate,values.entraceDate));
+        }catch(err){
+           console.log(err);
+        }
+           
         }}
       >
         {(props) => (
@@ -134,7 +123,7 @@ const UpdateMemberScreen = navData => {
            
               <TouchableOpacity
                 style={styles.button}
-                onPress={updateHandler}
+                onPress={props.handleSubmit}
               >
                 <Text style={styles.buttonText}>Update Now</Text>
               </TouchableOpacity>
